@@ -92,7 +92,12 @@ function M.read_path(_path, include_collapsed)
       break
     end
     local entry_path = path .. '/' .. name
-    local is_dir = type == 'directory'
+    local is_dir = false
+    if type == 'directory' then
+      is_dir = true
+    elseif type == 'link' then
+      is_dir = vim.fn.isdirectory(entry_path) == 1
+    end
     local display_name = is_dir and (name .. '/') or name
     local entry = {
       display_name = display_name,
@@ -100,7 +105,7 @@ function M.read_path(_path, include_collapsed)
       dirname = path,
       is_dir = is_dir,
       filetype = u.eval(function()
-        if type == 'directory' then
+        if is_dir then
           return
         end
         return M.get_filetype_from_path(entry_path)
